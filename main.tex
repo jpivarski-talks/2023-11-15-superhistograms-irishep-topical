@@ -134,6 +134,54 @@
 \end{uncoverenv}
 \end{frame}
 
+\begin{frame}[fragile]{Something like this}
+\vspace{0.15 cm}
+\small
+\begin{minted}{python}
+h = SuperHist(SuperHist(
+        SuperHist(
+            Hist.Reg(100, 0, 30, name="syst-up"),
+            Hist.Reg(100, 0, 30, name="nominal"),
+            Hist.Reg(100, 0, 30, name="syst-down"),
+            name="pt",
+        ),
+        SuperHist(
+            Hist.Reg(100, -5, 5, name="syst-up"),
+            Hist.Reg(100, -5, 5, name="nominal"),
+            Hist.Reg(100, -5, 5, name="syst-down"),
+            name="eta",
+        ),
+        name="data",
+    ),
+    ...,   # similarly for name="mc"
+)
+h.fill(pandas_dataframe)   # one row is a scalar fill operation
+\end{minted}
+\end{frame}
+
+\begin{frame}{So far, this is looking like Histogrammar}
+\vspace{0.08 cm}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{histogrammar-website.png}
+\end{center}
+\end{frame}
+
+\begin{frame}{R.I.P. Histogrammar}
+\vspace{0.5 cm}
+\Large
+\textcolor{darkblue}{Histogrammar was too loose: it described a {\it tree} of nested binnings (unlike Boost::Histogram's {\it sequence}), and then there was no connection among the branches of the tree.}
+
+\vspace{1 cm}
+\uncover<2->{\textcolor{darkblue}{We need a relationship that restricts the superhistogram to a useful subset of all possible trees.}}
+\end{frame}
+
+\begin{frame}{Abstract algebra for fun (profit comes later)}
+
+
+
+
+
+\end{frame}
 
 
 \end{document}
