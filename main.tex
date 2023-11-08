@@ -32,7 +32,7 @@
 \definecolor{darkgreen}{rgb}{0,0.6,0}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 
-\title[2023-11-15-superhistograms-irishep-topical]{Superhistograms \\ --- or --- \\ abstract algebra for fun and profit}
+\title[2023-11-15-superhistograms-irishep-topical]{SuperhistogramS \\ --- or --- \\ abstract algebra for fun and profit}
 \author{Jim Pivarski}
 \institute{Princeton University -- IRIS-HEP}
 \date{November 15, 2023}
@@ -56,9 +56,84 @@
 
 % START START START START START START START START START START START START START
 
-\begin{frame}{First slide}
+\begin{frame}{Vague statement of the problem}
+\Large
 \vspace{0.5 cm}
-HERE
+\begin{columns}
+\column{0.4\linewidth}
+\only<1>{\textcolor{darkblue}{Long, long ago, histograms were individual objects that were managed individually.}}\only<2>{\textcolor{darkblue}{Now, histograms are more often used collectively, with thousands of histograms in a single fit.}}
+
+\column{0.6\linewidth}
+\only<1>{\hfill\includegraphics[width=0.8\linewidth]{old-school-histograms.pdf}}\only<2>{\includegraphics[width=\linewidth]{modern-histograms.pdf}}
+
+\end{columns}
 \end{frame}
+
+\begin{frame}{Vague statement of the problem}
+\vspace{0.5 cm}
+\Large
+\textcolor{darkblue}{A ``superhistogram'' is a large collection of histograms that are meant to be interpreted together.}
+\end{frame}
+
+\begin{frame}{Vague statement of the problem}
+\vspace{0.5 cm}
+\large
+
+\textcolor{darkblue}{Representing a superhistogram with a directory of ordinary histograms is}
+
+\vspace{0.5 cm}
+\begin{itemize}\setlength{\itemsep}{0.5 cm}
+\item \textcolor{darkblue}{wasteful} because much of the same metadata is copied in memory or on disk, and many small buffers of bin contents is less efficient than one big buffer.
+
+\item \textcolor{darkblue}{inconvenient} because the object with a common meaning has to be managed as individual objects without an explicit connection. (Usually, they're linked with naming conventions.)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Vague statement of the problem}
+\vspace{0.5 cm}
+\Large
+\textcolor{darkblue}{Boost::Histogram provides a generic way to create an $n$-dimensional space with regular, variable, and categorical axes.}
+
+\vspace{0.5 cm}
+\begin{columns}
+\column{0.6\linewidth}
+\includegraphics[width=\linewidth]{histogram_design.png}
+
+\column{0.4\linewidth}
+\includegraphics[width=\linewidth]{axis_regular.png}
+
+\vspace{0.35 cm}
+\includegraphics[width=\linewidth]{axis_variable.png}
+
+\vspace{0.35 cm}
+\includegraphics[width=\linewidth]{axis_category.png}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Vague statement of the problem}
+\vspace{0.5 cm}
+\Large
+
+\textcolor{darkblue}{But a Boost::Histogram is still a single histogram:}
+
+\vspace{0.25 cm}
+\begin{itemize}
+\item $n$ axes form an $n$-dimensional space,
+\item each scalar \mintinline{python}{fill} operation increments {\it one} bin in that space.
+\end{itemize}
+
+\vspace{0.75 cm}
+\begin{uncoverenv}<2->
+\textcolor{darkblue}{A superhistogram has multiple sources, channels, and systematics.}
+
+\vspace{0.25 cm}
+\begin{itemize}
+\item Not all histograms in the collection have the same number of bins or the same dimensions.
+\item One \mintinline{python}{fill} of the superhistogram would increment every histogram in the collection.
+\end{itemize}
+\end{uncoverenv}
+\end{frame}
+
+
 
 \end{document}
