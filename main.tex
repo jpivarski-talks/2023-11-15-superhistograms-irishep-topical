@@ -85,7 +85,7 @@
 \begin{itemize}\setlength{\itemsep}{0.5 cm}
 \item \textcolor{darkblue}{wasteful} because much of the same metadata is copied in memory or on disk, and many small buffers of bin contents is less efficient than one big buffer.
 
-\item \textcolor{darkblue}{inconvenient} because the object with a common meaning has to be managed as individual objects without an explicit connection. (Usually, they're linked with naming conventions.)
+\item \textcolor{darkblue}{inconvenient} because the object with a common meaning has to be managed as individual objects without an explicit connection. (Often in practice, they're only linked by naming conventions.)
 \end{itemize}
 \end{frame}
 
@@ -128,7 +128,7 @@
 
 \vspace{0.25 cm}
 \begin{itemize}
-\item Not all histograms in the collection have the same number of bins or the same dimensions.
+\item Not all histograms in the collection have the same number of bins or the same dimensions, but many do.
 \item One \mintinline{python}{fill} of the superhistogram would increment every histogram in the collection.
 \end{itemize}
 \end{uncoverenv}
@@ -153,9 +153,9 @@ h = SuperHist(SuperHist(
         ),
         name="data",
     ),
-    ...,   # similarly for name="mc"
+    ...,     # similarly for name="mc"
 )
-h.fill(pandas_dataframe)   # one row is a scalar fill operation
+h.fill(df)   # one DataFrame row is a scalar fill operation
 \end{minted}
 \end{frame}
 
@@ -169,7 +169,7 @@ h.fill(pandas_dataframe)   # one row is a scalar fill operation
 \begin{frame}{R.I.P. Histogrammar}
 \vspace{0.5 cm}
 \Large
-\textcolor{darkblue}{Histogrammar was too loose: it described a {\it tree} of nested binnings (unlike Boost::Histogram's {\it sequence}), and then there was no connection among the branches of the tree.}
+\textcolor{darkblue}{Histogrammar was too loose: it described a {\it tree} of nested axes (unlike Boost::Histogram's {\it sequence}), and then there was no connection among the branches of that tree.}
 
 \vspace{1 cm}
 \uncover<2->{\textcolor{darkblue}{We need a relationship that restricts the superhistogram to a useful subset of all possible trees.}}
@@ -183,7 +183,7 @@ h.fill(pandas_dataframe)   # one row is a scalar fill operation
 
 \vspace{0.5 cm}
 \begin{uncoverenv}<2->
-The most common is a {\bf monoid}, which is any set $S$ with a binary operation $x \cdot y = z$ ($x \in S$, $y \in S$, $z \in S$) that
+The most common is a {\bf monoid}, which is any set $S$ with a binary operation $x \cdot y = z$ ($x$, $y$, and $z$ are all in $S$) that
 
 \begin{center}
 \begin{minipage}{0.5\linewidth}
@@ -207,8 +207,8 @@ The most common is a {\bf monoid}, which is any set $S$ with a binary operation 
 \begin{itemize}\setlength{\itemsep}{0.25 cm}
 \item<1-> Natural numbers ($\Bbb{N} = \{0, 1, 2, \ldots\}$) under addition ($+$). The identity is $0$.
 \item<2-> Positive integers ($\Bbb{P} = \{1, 2, \ldots\}$) under multiplication ($\times$). The identity is $1$.
-\item<3-> Extended reals ($\Bbb{R} \times \{-\infty, \infty\}$) under minimization. The identity is $\infty$.
-\item<4-> Strings (e.g. \mintinline{python}{"abc"}, \mintinline{python}{"def"}) under concatenation (e.g. \mintinline{python}{"abc" + "def"} $\to$ \mintinline{python}{"abcdef"}). The identity is the empty string (\mintinline{python}{""}).
+\item<3-> Extended reals ($\Bbb{R} \cup \{-\infty, \infty\}$) under minimization. The identity is $\infty$.
+\item<4-> Strings (e.g. \mintinline{python}{"abc"}, \mintinline{python}{"def"}) under concatenation (e.g. \mintinline{python}{"abc" + "def"} $\to$ \mintinline{python}{"abcdef"}). The identity is the empty string (\mintinline{python}{""}). \textcolor{gray}{(Not commutative!)}
 \item<5-> Histogram contents with identical binning under histogram-addition (\mintinline{bash}{hadd}). The identity is the empty histogram. We can parallelize histogram-filling because adding bin contents is associative: we get the same answer no matter how \mintinline{python}{fill} operations are divided up among workers.
 \item<6-> Boost::Histogram axes under Cartesian product: $n$ axes, an $n$-dimensional space, combined with $m$ axes, an $m$-dimensional space, forms an $(n + m)$-dimensional space. An axis with 1 bin could be called an identity.
 \end{itemize}
@@ -234,7 +234,7 @@ A {\bf semiring} is any set $S$ with two operations, ``$+$'' and ``$\times$'', s
 \end{center}
 
 \vspace{0.5 cm}
-\uncover<2->{Example: natural numbers under ordinary addition and multiplication.}
+\uncover<2->{{\bf Example:} natural numbers under ordinary addition and multiplication.}
 \end{frame}
 
 \begin{frame}[fragile]{Superhistograms as a semiring}
@@ -261,9 +261,10 @@ StrCategory(["data", "mc"], name="src") * (
 )
 \end{minted}
 
-\vspace{-0.1 cm}
+\vspace{-0.3 cm}
 \centering {\normalsize is equal to}
 
+\vspace{0.1 cm}
 \begin{minted}{python}
 StrCategory(["data", "mc"], name="src") * Reg(100, 0, 30, name="pt") +
 StrCategory(["data", "mc"], name="src") * Reg(50, -5, 5, name="eta")
@@ -296,13 +297,13 @@ represents two 2-dimensional histograms, both with the same first axis $a$, diff
 \begin{frame}{A superhistogram is a jagged array}
 \vspace{0.25 cm}
 \large
-In Boost::Histogram terms, axes $a$, $b$, and $c$ in expressions like
+In Boost::Histogram terms, \mintinline{python}{Axis} $a$, $b$, and $c$ in expressions like
 
 \vspace{-0.2 cm}
 \[ a \times (b + c) = (a \times b) + (a \times c) \]
 
 \vspace{0.2 cm}
-would share one \mintinline{python}{Storage}, such as \mintinline{python}{Double} (an floating-point array).
+would share one \mintinline{python}{Storage}, such as \mintinline{python}{Double} (an array of floating-point values).
 
 \begin{center}
 \includegraphics[width=0.8\linewidth]{sharing-storage.pdf}
@@ -345,8 +346,54 @@ fills the histogram with axes \mintinline{python}{"src"} and \mintinline{python}
 \textcolor{darkblue}{Why does it matter that superhistograms form a semiring?}
 \end{frame}
 
-\begin{frame}{}
+\begin{frame}{\mbox{ }}
+\vspace{0.5 cm}
+\Large
+Superhistograms/semirings have two canonical forms:
 
+\vspace{0.25 cm}
+\begin{itemize}
+\item fully expanded: $(a \times b) + (a \times c)$
+\item maximally factorized: $a \times (b + c)$
+\end{itemize}
+
+\large
+\vspace{0.5 cm}
+\begin{uncoverenv}<2->
+\textcolor{darkblue}{The expanded form is ideal for {\it filling}.} The histograms are in a single, flat collection, a jagged array over the \mintinline{python}{Storage}.
+
+\vspace{0.2 cm}
+Finding bin $i$ of histogram $n$ is an $\mathcal{O}(1)$ operation, a single offset-lookup.
+\end{uncoverenv}
+
+\vspace{0.5 cm}
+\uncover<3->{\textcolor{darkblue}{The factorized form is ideal for {\it serialization}.} Repeated axis metadata only needs to be stored once. (Important for large variable and categorical axes.)}
+
+\vspace{0.5 cm}
+\uncover<4->{\textcolor{darkblue}{Maybe this could also simplify the interface.} (Slicing across all the histograms?)}
+\end{frame}
+
+\begin{frame}{Contrast to Histogrammar}
+\vspace{0.5 cm}
+\Large
+
+\textcolor{darkblue}{Histogrammar objects were trees, without a distributive property.}
+
+\large
+\vspace{0.75 cm}
+\uncover<2->{They couldn't be expanded or factorized, couldn't share a \mintinline{python}{Storage}, and generically needed lambda functions to be manually set on each node of the tree to say what the \mintinline{python}{fill} operation should do.}
+
+\vspace{0.75 cm}
+\uncover<3->{By adding this algebraic structure, we restrict the possibilities, but in ways that have benefits to how we want to fill, store, and manipulate histograms.}
+\end{frame}
+
+\begin{frame}{Onward}
+\vspace{0.5 cm}
+\LARGE
+
+\begin{center}
+\textcolor{darkblue}{To Peter's talk!}
+\end{center}
 \end{frame}
 
 \end{document}
