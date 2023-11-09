@@ -176,6 +176,72 @@ h.fill(pandas_dataframe)   # one row is a scalar fill operation
 \end{frame}
 
 \begin{frame}{Abstract algebra for fun (profit comes later)}
+\vspace{0.5 cm}
+\large
+
+\textcolor{darkblue}{Many operations on data structures can be described as abstract algebras.}
+
+\vspace{0.5 cm}
+\begin{uncoverenv}<2->
+The most common is a {\bf monoid}, which is any set $S$ with a binary operation $x \cdot y = z$ ($x \in S$, $y \in S$, $z \in S$) that
+
+\begin{center}
+\begin{minipage}{0.5\linewidth}
+\begin{itemize}
+\item[\textcolor{black}{\bf is associative:}] $(x \cdot y) \cdot z = x \cdot (y \cdot z)$
+
+\item[\textcolor{black}{\bf has an identity:}] there is an $e \in S$ such that $e \cdot x = x$ and $x \cdot e = x$ for all $x \in S$.
+\end{itemize}
+\end{minipage}
+\end{center}
+\end{uncoverenv}
+
+\vspace{0.5 cm}
+\uncover<3->{\textcolor{gray}{(You may be familiar with {\bf groups}, which are {\bf monoids} without inverses.)}}
+\end{frame}
+
+\begin{frame}{Examples of monoids}
+\large
+\vspace{0.5 cm}
+
+\begin{itemize}\setlength{\itemsep}{0.25 cm}
+\item<1-> Natural numbers ($\Bbb{N} = \{0, 1, 2, \ldots\}$) under addition ($+$). The identity is $0$.
+\item<2-> Positive integers ($\Bbb{P} = \{1, 2, \ldots\}$) under multiplication ($\times$). The identity is $1$.
+\item<3-> Extended reals ($\Bbb{R} \times \{-\infty, \infty\}$) under minimization. The identity is $\infty$.
+\item<4-> Strings (e.g. \mintinline{python}{"abc"}, \mintinline{python}{"def"}) under concatenation (e.g. \mintinline{python}{"abc" + "def"} $\to$ \mintinline{python}{"abcdef"}). The identity is the empty string (\mintinline{python}{""}).
+\item<5-> Histogram contents with identical binning under histogram-addition (\mintinline{bash}{hadd}). The identity is the empty histogram. We can parallelize histogram-filling because adding bin contents is associative: we get the same answer no matter how \mintinline{python}{fill} operations are divided up among workers.
+\item<6-> Boost::Histogram axes under Cartesian product: $n$ axes, an $n$-dimensional space, combined with $m$ axes, an $m$-dimensional space, forms an $(n + m)$-dimensional space. An axis with 1 bin could be called an identity.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{For superhistograms, we need a semiring}
+\large
+\vspace{0.5 cm}
+
+A {\bf semiring} is any set $S$ with two operations, ``$+$'' and ``$\times$'', such that
+
+\vspace{0.25 cm}
+\begin{center}
+\begin{minipage}{0.9\linewidth}
+\begin{itemize}
+\item $S$ under $+$ is a monoid; let's call its identity ``$0$''.
+\item $S$ under $\times$ is a monoid; let's call its identity ``$1$''.
+\item $+$ is commutative: \fbox{$a + b = b + a$}.
+\item $0$ absorbs everything under $\times$: \fbox{$a \times 0 = 0 = 0 \times a$}.
+\item $\times$ is distributive over $+$: \fbox{$a \times (b + c) = (a \times b) + (a \times c)$} \\ \hfill and \fbox{$(b + c) \times a = (b \times a) + (c \times a)$}.\mbox{\hspace{1.525 cm}}
+\end{itemize}
+\end{minipage}
+\end{center}
+
+\vspace{0.5 cm}
+\uncover<2->{Example: natural numbers under ordinary addition and multiplication.}
+\end{frame}
+
+\begin{frame}{Superhistograms as a semiring}
+\large
+\vspace{0.5 cm}
+
+Building a superhistogram 
 
 
 
