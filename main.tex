@@ -140,15 +140,15 @@
 \begin{minted}{python}
 h = SuperHist(SuperHist(
         SuperHist(
-            Hist.Reg(100, 0, 30, name="syst-up"),
-            Hist.Reg(100, 0, 30, name="nominal"),
-            Hist.Reg(100, 0, 30, name="syst-down"),
+            Hist.new.Reg(100, 0, 30, name="syst-up"),
+            Hist.new.Reg(100, 0, 30, name="nominal"),
+            Hist.new.Reg(100, 0, 30, name="syst-down"),
             name="pt",
         ),
         SuperHist(
-            Hist.Reg(100, -5, 5, name="syst-up"),
-            Hist.Reg(100, -5, 5, name="nominal"),
-            Hist.Reg(100, -5, 5, name="syst-down"),
+            Hist.new.Reg(50, -5, 5, name="syst-up"),
+            Hist.new.Reg(50, -5, 5, name="nominal"),
+            Hist.new.Reg(50, -5, 5, name="syst-down"),
             name="eta",
         ),
         name="data",
@@ -237,17 +237,116 @@ A {\bf semiring} is any set $S$ with two operations, ``$+$'' and ``$\times$'', s
 \uncover<2->{Example: natural numbers under ordinary addition and multiplication.}
 \end{frame}
 
-\begin{frame}{Superhistograms as a semiring}
+\begin{frame}[fragile]{Superhistograms as a semiring}
 \large
 \vspace{0.5 cm}
 
-Building a superhistogram 
+To build a superhistogram, we put axes together in two ways:
 
+\vspace{0.25 cm}
+\begin{itemize}
+\item Cartesian product $\times$, to form a space, like an ordinary Boost::Histogram.
+\item Collection $+$, to form a set, like a directory of histograms.
+\end{itemize}
 
+\vspace{0.5 cm}
+\begin{uncoverenv}<2->
+\begin{columns}
+\column{1.05\linewidth}
 
+\small
+\begin{minted}{python}
+StrCategory(["data", "mc"], name="src") * (
+    Reg(100, 0, 30, name="pt") + Reg(50, -5, 5, name="eta")
+)
+\end{minted}
 
+\vspace{-0.1 cm}
+\centering {\normalsize is equal to}
 
+\begin{minted}{python}
+StrCategory(["data", "mc"], name="src") * Reg(100, 0, 30, name="pt") +
+StrCategory(["data", "mc"], name="src") * Reg(50, -5, 5, name="eta")
+\end{minted}
+
+\vspace{0.1 cm}
+\centering {\normalsize Two histograms have the same categorical axis, different regular axes.}
+\end{columns}
+\end{uncoverenv}
 \end{frame}
 
+\begin{frame}{Checking the properties}
+\vspace{0.5 cm}
+\large
+
+\begin{itemize}\setlength{\itemsep}{0.25 cm}
+\item<1-> Superhistograms under $+$ is a commutative monoid: a set of histograms has no intrinsic order and all lives at one level (no subdirectories).
+\item<1-> The identity of $+$ is the empty set (no histograms).
+\item<2-> Superhistograms under $\times$ is a monoid: an $n$-dimensional space $\times$ an $m$-dimensional space forms an $(n + m)$-dimensional space.
+\item<2-> The identity of $\times$ is a one-bin axis.
+\item<3-> $+$ and $\times$ obey a distributive property: if $a$, $b$, and $c$ are axes,
+
+\vspace{-0.25 cm}
+\[ a \times (b + c) = (a \times b) + (a \times c) \]
+
+represents two 2-dimensional histograms, both with the same first axis $a$, differing in their second axes $b$ or $c$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{A superhistogram is a jagged array}
+\vspace{0.25 cm}
+\large
+In Boost::Histogram terms, axes $a$, $b$, and $c$ in expressions like
+
+\vspace{-0.2 cm}
+\[ a \times (b + c) = (a \times b) + (a \times c) \]
+
+\vspace{0.2 cm}
+would share one \mintinline{python}{Storage}, such as \mintinline{python}{Double} (an floating-point array).
+
+\begin{center}
+\includegraphics[width=0.8\linewidth]{sharing-storage.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[fragile]{A superhistogram is filled by DataFrames}
+\vspace{0.25 cm}
+\large
+
+Each \mintinline{python}{fill} operation increments 1 bin in each multiplicative space, and every such space in an additive collection.
+
+\small
+\begin{minted}{python}
+h = StrCategory(["data", "mc"], name="src") * (
+    Reg(100, 0, 30, name="pt") + Reg(50, -5, 5, name="eta")
+)
+\end{minted}
+
+\begin{columns}
+\column{0.45\linewidth}
+\hfill\mintinline{python}{h.fill(}
+
+\column{0.2\linewidth}
+\includegraphics[width=\linewidth]{dataframe.png}
+
+\column{0.45\linewidth}
+\mintinline{python}{)}
+
+\end{columns}
+
+\large
+\vspace{0.5 cm}
+fills the histogram with axes \mintinline{python}{"src"} and \mintinline{python}{"pt"} 5 times, and \\ fills the histogram with axes \mintinline{python}{"src"} and \mintinline{python}{"eta"} 5 times.
+\end{frame}
+
+\begin{frame}{Abstract algebra for profit}
+\vspace{0.5 cm}
+\Large
+\textcolor{darkblue}{Why does it matter that superhistograms form a semiring?}
+\end{frame}
+
+\begin{frame}{}
+
+\end{frame}
 
 \end{document}
